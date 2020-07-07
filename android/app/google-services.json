@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "595024819690",
+    "firebase_url": "https://udi-test-1.firebaseio.com",
+    "project_id": "udi-test-1",
+    "storage_bucket": "udi-test-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595024819690:android:f535ae31b43e4ec476ae93",
+        "android_client_info": {
+          "package_name": "com.example.uddhriti"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595024819690-vr6ikbn4pqk8ssmn4rmoomkoionkltiv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnZoTA_8nClW6USwU4Z3nhmu1KAwbDr3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595024819690-vr6ikbn4pqk8ssmn4rmoomkoionkltiv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
