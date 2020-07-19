@@ -20,6 +20,9 @@ dependencies:
   flutter_spinkit: ^4.1.2
   google_sign_in: ^4.4.4
   flutter_colorpicker: ^0.3.4
+  image_picker:
+  firebase_storage: 
+  firebase_core: 
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uddhriti/models/user.dart';
 import 'package:uddhriti/pages/screens/create_post_screen.dart';
 import 'package:uddhriti/pages/screens/feed_screen.dart';
 import 'package:uddhriti/pages/screens/search_screen.dart';
@@ -6,6 +7,10 @@ import 'package:uddhriti/pages/screens/notification_screen.dart';
 import 'package:uddhriti/pages/screens/profile_screen.dart';
 
 class Home extends StatefulWidget {
+  final User user;
+
+  Home({this.user});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -38,7 +43,7 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreatePostScreen()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreatePostScreen(user: widget.user)));
         },
       ),
 

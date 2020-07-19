@@ -1,12 +1,26 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uddhriti/constants.dart';
+import 'package:uddhriti/helpers/common_widgets/facility_button.dart';
 import 'package:uddhriti/helpers/create_post_helpers/background_color.dart';
 import 'package:uddhriti/helpers/create_post_helpers/edit_button.dart';
 import 'package:uddhriti/helpers/create_post_helpers/text_size.dart';
 import 'package:uddhriti/helpers/create_post_helpers/text_size_slider.dart';
 import 'package:uddhriti/helpers/create_post_helpers/text_style.dart';
 import 'package:uddhriti/helpers/create_post_helpers/text_style_panel.dart';
+import 'package:uddhriti/models/user.dart';
+import 'package:uddhriti/pages/home.dart';
+import 'package:uddhriti/services/auth.dart';
 
 class CreatePostScreen extends StatefulWidget {
+  final User user;
+
+  CreatePostScreen({this.user});
+
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
 }
@@ -18,6 +32,44 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool boldText, italicText, underlinedText = false;
   int quoteFontSize = 17;
   String quoteText = '';
+
+  File imageFile;
+
+  AuthService auth = AuthService();
+
+  // Image picker
+  Future<void> pickImage() async {
+    File selected = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      imageFile = selected;
+    });
+  }
+
+  // clear image
+  void clearImage() {
+    setState(() {
+      return imageFile = null;
+    });
+  }
+
+  // Upload files
+  bool isUploading = false;
+
+  final FirebaseStorage storage =
+      FirebaseStorage(storageBucket: 'gs://udi-test-1.appspot.com');
+
+  StorageUploadTask uploadTask;
+
+  void startUpload(
+      {File file = null}) {
+    // Image Upload
+    String imageFilePath = widget.user.email + 'images/${DateTime.now()}.png';
+
+    setState(() {
+      uploadTask = storage.ref().child(imageFilePath).putFile(file);
+    });
+  }
 
 //  Here we get the string or the quote that will be displayed
   updateQuoteText(String string) {
@@ -137,6 +189,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     initialBoolValue: showTextStylePanel,
                     showTextStylePanel: updateTextSizePanel,
                   ),
+                  // ****************BG IMAGE PICKER***************
+                  facilityButton(
+                    icon: Icons.photo_library,
+                    label: 'Background',
+                    onPressed: () => pickImage(),
+                  ),
                 ],
               ),
             ),
@@ -145,26 +203,53 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 alignment: Alignment.center,
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: Container(
-                    color: currentBGColor,
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(10.0),
-                    child: Text(
-                      quoteText,
-                      style: TextStyle(
-                        fontSize: quoteFontSize.toDouble(),
-                        color: Colors.black,
-                        fontWeight: boldText == true
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        fontStyle: italicText == true
-                            ? FontStyle.italic
-                            : FontStyle.normal,
-                        decoration: underlinedText == true
-                            ? TextDecoration.underline
-                            : TextDecoration.none,
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        color: currentBGColor,
+                        alignment: Alignment.center,
+                        child: imageFile == null
+                            ? Container()
+                            : Image.file(imageFile,
+                                fit: BoxFit.cover), //TODO: ------------
+                        // child: Text(
+                        //   quoteText,
+                        //   style: TextStyle(
+                        //     fontSize: quoteFontSize.toDouble(),
+                        //     color: Colors.black,
+                        //     fontWeight: boldText == true
+                        //         ? FontWeight.bold
+                        //         : FontWeight.normal,
+                        //     fontStyle: italicText == true
+                        //         ? FontStyle.italic
+                        //         : FontStyle.normal,
+                        //     decoration: underlinedText == true
+                        //         ? TextDecoration.underline
+                        //         : TextDecoration.none,
+                        //   ),
+                        // ),
                       ),
-                    ),
+                      Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          quoteText,
+                          style: TextStyle(
+                            fontSize: quoteFontSize.toDouble(),
+                            color: Colors.black,
+                            fontWeight: boldText == true
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            fontStyle: italicText == true
+                                ? FontStyle.italic
+                                : FontStyle.normal,
+                            decoration: underlinedText == true
+                                ? TextDecoration.underline
+                                : TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -217,23 +302,56 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                             //     color: Colors.white,
                             //   ),
                             // ),
-                            FlatButton(
-                              onPressed: () {},
-                              color: Theme.of(context).primaryColor,
-                              child: Row(
-                                children: <Widget>[
-                                  Text(
-                                "UPLOAD",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 8.0),
-                              Icon(Icons.check_circle_outline, color: Colors.white, size: 20.0)
-                                ],
-                              ),
-                            ),
+
+                            //* Upload file and text
+                            uploadTask != null
+                                ? StreamBuilder<StorageTaskEvent>(
+                                    stream: uploadTask.events,
+                                    builder: (context, snapshotVar) {
+                                      if (uploadTask.isComplete)
+                                        return Row(
+                                          children: <Widget>[
+                                            Icon(Icons.check_circle_outline,
+                                                color: kPrimaryColor),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'Upload Complete',
+                                              style: TextStyle(
+                                                  color: kPrimaryColor),
+                                            ),
+                                          ],
+                                        );
+
+                                      if (uploadTask.isInProgress)
+                                        return SpinKitThreeBounce(
+                                            color: kPrimaryColor, size: 20);
+                                    },
+                                  )
+                                : FlatButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        startUpload(
+                                          file: imageFile,
+                                        );
+                                      });
+                                    },
+                                    color: Theme.of(context).primaryColor,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Text(
+                                          "UPLOAD",
+                                          style: TextStyle(
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.0),
+                                        Icon(Icons.check_circle_outline,
+                                            color: Colors.white, size: 20.0)
+                                      ],
+                                    ),
+                                  ),
+
                             // Container(
                             //   height: 40.0,
                             //   width: 40.0,

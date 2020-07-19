@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uddhriti/pages/authenticate/google_sign_in.dart';
 import 'package:uddhriti/pages/authenticate/sign_in_screen.dart';
 import 'package:uddhriti/pages/authenticate/sign_up_screen.dart';
 
@@ -13,15 +14,16 @@ class Authenticate extends StatefulWidget {
 
 class _AuthenticateState extends State<Authenticate> {
 
-  bool showSignIn = true;
-  void toggleView() {
-    setState(() {
-      showSignIn = !showSignIn;
-    });
-  }
+  // bool showSignIn = true;
+  // void toggleView() {
+  //   setState(() {
+  //     showSignIn = !showSignIn;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return showSignIn ? SignInPage(toggleView: toggleView) : SignUpPage(toggleView: toggleView);
+    //return showSignIn ? SignInPage(toggleView: toggleView) : SignUpPage(toggleView: toggleView);
+    return GoogleSignInPage();
   }
 }

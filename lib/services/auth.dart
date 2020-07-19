@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uddhriti/models/user.dart';
+import 'package:uddhriti/pages/screens/create_post_screen.dart';
 
 class AuthService {
   // gives access to firebase auth services (like sign in anon, sign in with google etc.)
@@ -8,14 +9,14 @@ class AuthService {
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   // create user object based on FirebaseUser
-  User _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? User(uid: user.uid) : null;
+  User userFromFirebaseUser(FirebaseUser user) {
+    return user != null ? User(uid: user.uid, email: user.email) : null;
   }
 
   // auth change user stream
   Stream<User> get user {
     return _auth.onAuthStateChanged
-        .map((FirebaseUser user) => _userFromFirebaseUser(user));
+        .map((FirebaseUser user) => userFromFirebaseUser(user));
   }
 
   // sign in anon
@@ -23,7 +24,7 @@ class AuthService {
     try {
       AuthResult result = await _auth.signInAnonymously();
       FirebaseUser user = result.user;
-      return _userFromFirebaseUser(user);
+      return userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
       return null;
@@ -37,7 +38,7 @@ class AuthService {
           email: email, password: password);
       FirebaseUser user = result.user;
       if (user.isEmailVerified) {
-        return _userFromFirebaseUser(user);
+        return userFromFirebaseUser(user);
       } else {
         return null;
       }
@@ -67,7 +68,7 @@ class AuthService {
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
 
-    return _userFromFirebaseUser(user);
+    return userFromFirebaseUser(user);
   }
 
   // register with email and password
@@ -78,7 +79,7 @@ class AuthService {
       FirebaseUser user = result.user;
       try {
         await user.sendEmailVerification();
-        return _userFromFirebaseUser(user);
+        return userFromFirebaseUser(user);
       } catch (e) {
         return null;
       }
